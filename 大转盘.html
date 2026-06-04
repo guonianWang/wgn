@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宝宝今天吃什么</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+        body{
+            background: url('./ww1.jpg') no-repeat center center fixed;
+            background-size: 100% 100%;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            padding:40px 10px;
+            min-height:100vh;
+        }
+        h2{
+            color:#ffffff;
+            margin-bottom:12px;
+            text-shadow: 1px 1px 6px #333;
+        }
+        /*外层固定外框 完全不动*/
+        .wheel-box{
+            width:320px;height:320px;
+            position:relative;
+            border:8px solid #fff;
+            border-radius:50%;
+            box-shadow:0 0 20px #888;
+            overflow:hidden;
+        }
+        /*仅画布旋转*/
+        #wheel{
+            width:100%;height:100%;
+            border-radius:50%;
+            transition: all 4s cubic-bezier(0.18,0,0.22,1);
+        }
+        /*中心按钮固定不动*/
+        .center-wrap{
+            width:80px;height:80px;
+            position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+            z-index:9;
+        }
+        .center-circle{
+            width:100%;height:100%;
+            background:#fff;
+            border-radius:50%;
+            box-shadow:0 0 8px #ccc;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:bold;color:#ff5577;
+            font-size:15px;
+            cursor:pointer;
+            position:relative;
+        }
+        /*中心向上箭头固定不动，落点基准点*/
+        .inner-arrow{
+            position:absolute;
+            top:-12px;left:50%;
+            transform:translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left:8px solid transparent;
+            border-right:8px solid transparent;
+            border-bottom:14px solid #f53855;
+        }
+    </style>
+</head>
+<body>
+    <h2>吃什么·随机选择转到什么吃什么</h2>
+    <div class="wheel-box">
+        <canvas id="wheel"></canvas>
+        <div class="center-wrap">
+            <div class="center-circle" id="startBtn">
+                开转
+                <div class="inner-arrow"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+const foodList = [
+    "麻辣烫","蛋炒饭","螺蛳粉","楼下吃","烤肉拌饭",
+    "牛肉面","饺子","汉堡炸鸡","火锅","米线",
+    "凉皮","曹氏","老乡鸡","馄饨","麻辣香锅","烧烤"
+];
+const colorArr = ['#ffb6c1','#bfefff','#caffbf','#fff3b0','#e0c3fc','#ffd9b3'];
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const btn = document.getElementById('startBtn');
+
+const R = 160;
+canvas.width = 320;
+canvas.height = 320;
+let isRun = false;
+let rotateTotal = 0;
+const total = foodList.length;
+const perDeg = 360 / total;
+
+//绘制转盘
+function drawWheel(){
+    ctx.clearRect(0,0,R*2,R*2);
+    for(let i=0;i<total;i++){
+        let s = i * perDeg;
+        let e = (i+1)*perDeg;
+        ctx.beginPath();
+        ctx.moveTo(R,R);
+        ctx.arc(R,R,R,(s-90)*Math.PI/180,(e-90)*Math.PI/180);
+        ctx.fillStyle = colorArr[i%colorArr.length];
+        ctx.fill();
+        ctx.strokeStyle="#fff";
+        ctx.lineWidth=2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(R,R);
+        let mid = (s+e)/2 -90;
+        ctx.rotate(mid*Math.PI/180);
+        ctx.fillStyle="#222";
+        ctx.font="13px sans-serif";
+        ctx.fillText(foodList[i],R/2,6);
+        ctx.restore();
+    }
+}
+drawWheel();
+
+//只旋转、无任何弹窗无文字提示
+btn.onclick = function(){
+    if(isRun) return;
+    isRun = true;
+    let idx = Math.floor(Math.random()*total);
+    let addRotate = 360*6 + (total - idx)*perDeg - perDeg/2;
+    rotateTotal += addRotate;
+    canvas.style.transform = `rotate(${rotateTotal}deg)`;
+
+    setTimeout(()=>{
+        isRun = false;
+    },4000);
+}
+</script>
+</body>
+</html>
